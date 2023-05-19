@@ -196,127 +196,73 @@ class User extends Model {
 
 	}
 
-	public static function encrypt_decrypt($action, $string) 
-	{
-        $output         = false;
-        $encrypt_method = "AES-256-CBC";
-        $secret_key     = 'This is my secret key';
-        $secret_iv      = 'This is my secret iv';
-        // hash
-        $key = hash('sha256', $secret_key);
- 
-        // iv - encrypt method AES-256-CBC expects 16 bytes - else you will get a warning
-        $iv = substr(hash('sha256', $secret_iv), 0, 16);
-        if ($action == 'encrypt') {
-            $output = openssl_encrypt($string, $encrypt_method, $key, 0, $iv);
-            $output = base64_encode($output);
-        } else if ($action == 'decrypt') {
-            $output = openssl_decrypt(base64_decode($string), $encrypt_method, $key, 0, $iv);
-        }
-        return $output;
-    }
-
 	public static function getForgot($email, $inadmin = true)
 	{
 
-			$sql = new Sql();
-	     	$results = $sql->select("
-	         SELECT *
-	         FROM tb_persons a
-	         INNER JOIN tb_users b USING(idperson)
-	         WHERE a.desemail = :email;
-	     ", array(
-	         ":email"=>$email
-	     ));
-	     if (count($results) === 0)
-	     {
-	         throw new \Exception("Não foi possível recuperar a senha.");
-	     }
-	     else
-	     {
-	         $data = $results[0];
-	         $results2 = $sql->select("CALL sp_userspasswordsrecoveries_create(:iduser, :desip)", array(
-	             ":iduser"=>$data['iduser'],
-	             ":desip"=>$_SERVER['REMOTE_ADDR']
-	         ));
-	         if (count($results2) === 0)
-	         {
-	             throw new \Exception("Não foi possível recuperar a senha.");
-	         }
-	         else
-	         {
-	             $dataRecovery = $results2[0];
-	             $iv = random_bytes(openssl_cipher_iv_length('aes-256-cbc'));
-	             $code = openssl_encrypt($dataRecovery['idrecovery'], 'aes-256-cbc', User::SECRET, 0, $iv);
-	             $result = base64_encode($iv.$code);
-	             if ($inadmin === true) {
-	                 $link = "http://www.maxecommerce.com.br/admin/forgot/reset?code=$result";
-	             } else {
-	                 $link = "http://www.maxecommerce.com.br/forgot/reset?code=$result";
-	             } 
-	             $mailer = new Mailer($data['desemail'], $data['desperson'], "Redefinir senha da Max Store", "forgot", array(
-	                 "name"=>$data['desperson'],
-	                 "link"=>$link
-	             )); 
-	             
-	             $mailer->send();
-	             return $link;
-	         }
-	     }
-	 }
-
-	public static function validForgotDecrypt($result)
- 	{
-     $result = str_replace(' ', '+', $result);
-     $result = base64_decode($result);
-     $code = mb_substr($result, openssl_cipher_iv_length('aes-256-cbc'), null, '8bit');
-     $iv = mb_substr($result, 0, openssl_cipher_iv_length('aes-256-cbc'), '8bit');;
-     $idrecovery = openssl_decrypt($code, 'aes-256-cbc', User::SECRET, 0, $iv);
-     $sql = new Sql();
-     $results = $sql->select("
-         SELECT *
-         FROM tb_userspasswordsrecoveries a
-         INNER JOIN tb_users b USING(iduser)
-         INNER JOIN tb_persons c USING(idperson)
-         WHERE
-         a.idrecovery = :idrecovery
-         AND
-         a.dtrecovery IS NULL
-         AND
-         DATE_ADD(a.dtregister, INTERVAL 1 HOUR) >= NOW();
-     ", array(
-         ":idrecovery"=>$idrecovery
-     ));
-     if (count($results) === 0)
-     {
-         throw new \Exception("Não foi possível recuperar a senha.");
-     }
-     else
-     {
-         return $results[0];
-     }
- 	}
-	
-	public static function setFogotUsed($idrecovery)
-	{
-
 		$sql = new Sql();
 
-		$sql->query("UPDATE tb_userspasswordsrecoveries SET dtrecovery = NOW() WHERE idrecovery = :idrecovery", array(
-			":idrecovery"=>$idrecovery
+		$results = $sql->select("
+			SELECT *
+			FROM tb_persons a
+			INNER JOIN tb_users b USING(idperson)
+			WHERE a.desemail = :email;
+		", array(
+			":email"=>$email
 		));
 
-	}
+		if (count($results) === 0)
+		{
 
-	public function setPassword($password)
-	{
+			throw new \Exception("Não foi possível recuperar a senha.");
 
-		$sql = new Sql();
+		}
+		else
+		{
 
-		$sql->query("UPDATE tb_users SET despassword = :password WHERE iduser = :iduser", array(
-			":password"=>$password,
-			":iduser"=>$this->getiduser()
-		));
+			$data = $results[0];
+
+			$results2 = $sql->select("CALL sp_userspasswordsrecoveries_create(:iduser, :desip)", array(
+				":iduser"=>$data['iduser'],
+				":desip"=>$_SERVER['REMOTE_ADDR']
+			));
+
+			if (count($results2) === 0)
+			{
+
+				throw new \Exception("Não foi possível recuperar a senha.");
+
+			}
+			else
+			{
+
+				$dataRecovery = $results2[0];
+
+				$code = openssl_encrypt($dataRecovery['idrecovery'], 'AES-128-CBC', pack("a16", User::SECRET), 0, pack("a16", User::SECRET_IV));
+
+				$code = base64_encode($code);
+
+				if ($inadmin === true) {
+
+					$link = "http://www.maxecommerce.com.br/admin/forgot/reset?code=$code";
+
+				} else {
+
+					$link = "http://www.maxecommerce.com.br/forgot/reset?code=$code";
+					
+				}				
+
+				$mailer = new Mailer($data['desemail'], $data['desperson'], "Redefinir senha da Max Store", "forgot", array(
+					"name"=>$data['desperson'],
+					"link"=>$link
+				));				
+
+				$mailer->send();
+
+				return $link;
+
+			}
+
+		}
 
 	}
 
@@ -412,7 +358,7 @@ class User extends Model {
 	{
 
 		return password_hash($password, PASSWORD_DEFAULT, [
-			'cost'=>12
+			'cost'=>8
 		]);
 
 	}
@@ -492,4 +438,63 @@ class User extends Model {
 
 	} 
 
+	public static function validForgotDecrypt($code)
+	{
+
+		$code = base64_decode($code);
+
+		$idrecovery = openssl_decrypt($code, 'AES-128-CBC', pack("a16", User::SECRET), 0, pack("a16", User::SECRET_IV));
+
+		$sql = new Sql();
+
+		$results = $sql->select("
+			SELECT *
+			FROM tb_userspasswordsrecoveries a
+			INNER JOIN tb_users b USING(iduser)
+			INNER JOIN tb_persons c USING(idperson)
+			WHERE
+				a.idrecovery = :idrecovery
+				AND
+				a.dtrecovery IS NULL
+				AND
+				DATE_ADD(a.dtregister, INTERVAL 1 HOUR) >= NOW();
+		", array(
+			":idrecovery"=>$idrecovery
+		));
+
+		if (count($results) === 0)
+		{
+			throw new \Exception("Não foi possível recuperar a senha.");
+		}
+		else
+		{
+
+			return $results[0];
+
+		}
+
+	}
+
+	public static function setForgotUsed($idrecovery)
+	{
+
+		$sql = new Sql();
+
+		$sql->query("UPDATE tb_userspasswordsrecoveries SET dtrecovery = NOW() WHERE idrecovery = :idrecovery", array(
+			":idrecovery"=>$idrecovery
+		));
+
+	}
+
+	public function setPassword($password)
+	{
+		$sql = new Sql();
+
+		$sql->query("UPDATE tb_users SET despassword = :password WHERE iduser = :iduser", array(
+			":password"=>User::getPasswordHash($password),
+			":iduser"=>$this->getiduser()
+		));
+	}
 }
+
+ ?>
