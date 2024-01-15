@@ -133,6 +133,27 @@ class Cart extends Model {
 
         return Product::checkList($rows);
     }
+
+    public function getProductsTotals()
+    {
+        $sql = new Sql();
+
+        $results = $sql->select(
+            "SELECT SUM(vlprice) AS vlprice, SUM(vlwidth) AS vlwidth, SUM(vlheight) AS vlheight, SUM(vllength) AS vllength,
+            SUM(vlweight) AS vlweight, COUNT(*) AS nrqtd
+            FROM tb_products a
+            INNER JOIN tb_cartsproducts b ON a.idproduct = b.idproduct
+            WHERE b.idcart = :idcart AND dtremoved IS NULL;
+            ", [
+                ':idcart'=>$this->getidcart()
+        ]);
+
+        if(count($results) > 0){
+            return $results[0];
+        } else{
+            return[];
+        }
+    }
 }
 
  ?>
