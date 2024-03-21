@@ -13,7 +13,7 @@ use Rain\Tpl;
 class Mailer {
 	
 	const USERNAME = "maxsaccomani@outlook.com";
-	const PASSWORD = "@Max1mo2023";
+	const PASSWORD = "@Max1mo2024";
 	const NAME_FROM = "Max Store";
 
 	private $mail;
