@@ -164,49 +164,55 @@ class Cart extends Model {
     public function setFreight($nrzipcode)
     {
         $nrzipcode = str_replace('-', '', $nrzipcode);
+ 
         $totals = $this->getProductsTotals();
-
-        if($totals['nrqtd'] > 0){
-
+ 
+        if ($totals["nrqtd"] > 0){
+ 
             if ($totals['vlheight'] < 2) $totals['vlheight'] = 2;
             if ($totals['vllength'] < 16) $totals['vllength'] = 16;
-            if ($totals['vlwidth'] < 11) $totals['vlwidth'] = 11;
-
+ 
             $qs = http_build_query([
-                'nCdEmpresa'=>'',
-                'sDsSenha'=>'',
-                'nCdServico'=>'40010',
-                'sCepOrigem'=>'16303410',
-                'sCepDestino'=>$nrzipcode,
-                'nVlPeso'=>$totals['vlweight'],
-                'nCdFormato'=>'1',
-                'nVlComprimento'=>$totals['vllength'],
-                'nVlAltura'=>$totals['vlheight'],
-                'nVlLargura'=>$totals['vlwidth'],
-                'nVlDiametro'=>'0',
-                'sCdMaoPropria'=>'S',
-                'nVlValorDeclarado'=>$totals['vlprice'],
-                'sCdAvisoRecebimento'=>'S'
-            ]);
-
-            $xml = simplexml_load_file("http://correios.com.br/CalcPrecoPrazo.asmx/CalcPrecoPrazo?".$qs);
-
+                "nCdEmpresa"=>"",
+                "sDsSenha"=>"",
+                "nCdServico"=>"40010",
+                "sCepOrigem"=>"40354222",
+                "sCepDestino"=>$nrzipcode,
+                "nVlPeso"=>$totals['vlweight'],
+                "nCdFormato"=>"1",
+                "nVlComprimento"=>$totals['vllength'],
+                "nVlAltura"=>$totals['vlheight'],
+                "nVlLargura"=>$totals['vlwidth'],
+                "nVlDiametro"=>"0",
+                "sCdMaoPropria"=>"S",
+                "nVlValorDeclarado"=>$totals['vlprice'],
+                "sCdAvisoRecebimento"=>"S"
+            ]); 
+ 
+            $xml = simplexml_load_file("http://ws.correios.com.br/calculador/CalcPrecoPrazo.asmx/CalcPrecoPrazo?".$qs);
+ 
             $result = $xml->Servicos->cServico;
-
-            if($result->MsgErro != ''){
-                Cart::setMsgError($result->MsgErro);
-            } else{
+ 
+            if ($result->MsgErro != '') {
+                Cart::setMsgError($result->MsgErro);                
+            }else {
                 Cart::clearMsgError();
-            }
-
+            }           
+            
             $this->setnrdays($result->PrazoEntrega);
-            $this->setvlfreight(Cart::formatValueToDecimal($result->Valor));
+            $this->setvlfreight($this->formatValueToDecimal($result->Valor));
             $this->setdeszipcode($nrzipcode);
-
+ 
             $this->save();
+ 
             return $result;
-        } else{
-
+ 
+        }else {
+            $this->setnrdays(0);
+            $this->setvlfreight(0);
+            $this->setdeszipcode($nrzipcode);
+ 
+            $this->save();
         }
     }
 
