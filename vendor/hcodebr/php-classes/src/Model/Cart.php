@@ -83,7 +83,7 @@ class Cart extends Model {
             ':dessessionid'=>$this->getdessessionid(),
             ':iduser'=>$this->getiduser(),
             ':deszipcode'=>$this->getdeszipcode(),
-            ':vlfreight'=>$this->getvlfreight(),
+            //':vlfreight'=>$this->getvlfreight(),
             ':nrdays'=>$this->getnrdays()
         ]);
 
@@ -243,6 +243,7 @@ class Cart extends Model {
     public function updateFreight()
     {
         if($this->getdeszipcode() != ''){
+            $this->getdeszipcode();
             $this->setFreight($this->getdeszipcode());
         }
     }
@@ -255,11 +256,10 @@ class Cart extends Model {
 
     public function getCalculateTotal()
     {
-        $this->updateFreight();
+        //$this->updateFreight();
 
         $totals = $this->getProductsTotals();
-        $this->setvlsubtotal($totals['vlprice']);
-        $this->setvltotal($totals['vlprice'] + $this->getvlfreight());
+        return $totals;
     }
 }
 
