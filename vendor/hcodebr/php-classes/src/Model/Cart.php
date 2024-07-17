@@ -4,7 +4,6 @@ namespace Hcode\Model;
 
 use \Hcode\DB\Sql;
 use \Hcode\Model;
-use \Hcode\Mailer;
 use \Hcode\Model\User;
 use Hcode\Model\Product;
 
@@ -47,6 +46,12 @@ class Cart extends Model {
         $_SESSION[Cart::SESSION] = $this->getValues();
     }
 
+    public function removeSession()
+    {
+        $_SESSION[Cart::SESSION] = NULL;
+        session_regenerate_id();
+    }
+
     public function getFromSessionID()
     {
         $sql = new Sql();
@@ -83,7 +88,7 @@ class Cart extends Model {
             ':dessessionid'=>$this->getdessessionid(),
             ':iduser'=>$this->getiduser(),
             ':deszipcode'=>$this->getdeszipcode(),
-            //':vlfreight'=>$this->getvlfreight(),
+            ':vlfreight'=>$this->getvlfreight(),
             ':nrdays'=>$this->getnrdays()
         ]);
 
@@ -214,6 +219,22 @@ class Cart extends Model {
  
             $this->save();
         }
+    }
+
+    public static function removeToSession()
+    {
+        $_SESSION[Cart::SESSION] = NULL;
+    }
+
+    public static function removeFromSession(){
+        $_SESSION[Cart::SESSION] = NULL;
+    }
+
+    public function checkZipCode()
+    {
+        $products = $this->getProducts();
+        if (!count($products) > 0)
+            $this->setdeszipcode('');
     }
 
     public static function formatValueToDecimal($value):float
