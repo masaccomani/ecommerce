@@ -22,7 +22,7 @@ class Mailer {
  
 		$config = array(
 			"tpl_dir"=>$_SERVER["DOCUMENT_ROOT"]."/views/email/",
-			"cache_dir"=>$_SERVER["DOCUMENT_ROOT"]."/views-cache/",
+			"cache_dir"=>$_SERVER["DOCUMENT_ROOT"]."/ecommerce/views-cache/",
 			"debug"=>false
 		);
  
