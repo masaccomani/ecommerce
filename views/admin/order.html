@@ -6,9 +6,9 @@
         Pedido N°{$order.idorder}
     </h1>
     <ol class="breadcrumb">
-        <li><a href="/admin"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li><a href="/admin/orders">Pedidos</a></li>
-        <li class="active"><a href="/admin/orders/{$order.idorder}">Pedido N°{$order.idorder}</a></li>
+        <li><a href="/ecommerce/admin"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li><a href="/ecommerce/admin/orders">Pedidos</a></li>
+        <li class="active"><a href="/ecommerce/admin/orders/{$order.idorder}">Pedido N°{$order.idorder}</a></li>
     </ol>
     </section>
 
@@ -17,7 +17,7 @@
         <div class="row">
             <div class="col-xs-12">
             <h2 class="page-header">
-                <img src="/res/site/img/logo.png" alt="Logo">
+                <img src="/ecommerce/res/site/img/logo.png" alt="Logo">
                 <small class="pull-right">Date: {function="date('d/m/Y')"}</small>
             </h2>
             </div>
@@ -28,11 +28,11 @@
             <div class="col-sm-4 invoice-col">
             De
             <address>
-                <strong>HCODE</strong><br>
-                Rua Ademar Saraiva Leão, 234 - Alvarenga<br>
-                São Bernardo do Campo - SP<br>
-                Telefone: (11) 3171-3080<br>
-                E-mail: suporte@hcode.com.br
+                <strong>MAX ECOMMERCE</strong><br>
+                Rua Fulano de tal, 123 - Udemy<br>
+                Penápolis - SP<br>
+                Telefone: (18) 3333-2222<br>
+                E-mail: maxandrey@gmail.com
             </address>
             </div>
             <!-- /.col -->
@@ -139,7 +139,7 @@
         <!-- this row will not appear when printing -->
         <div class="row no-print">
             <div class="col-xs-12">
-                <button type="button" onclick="window.location.href = '/admin/orders/{$order.idorder}/status'" class="btn btn-default pull-left" style="margin-left: 5px;">
+                <button type="button" onclick="window.location.href = '/ecommerce/admin/orders/{$order.idorder}/status'" class="btn btn-default pull-left" style="margin-left: 5px;">
                     <i class="fa fa-pencil"></i> Editar Status
                </button>
                <button type="button" onclick="window.open('/boleto/{$order.idstatus}')" class="btn btn-default pull-left" style="margin-left: 5px;">

@@ -6,9 +6,9 @@
         Pedido N°{$order.idorder}
     </h1>
     <ol class="breadcrumb">
-        <li><a href="/admin"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li><a href="/admin/orders">Pedidos</a></li>
-        <li class="active"><a href="/admin/orders/{$order.idorder}">Pedido N°{$order.idorder}</a></li>
+        <li><a href="/ecommerce/admin"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li><a href="/ecommerce/admin/orders">Pedidos</a></li>
+        <li class="active"><a href="/ecommerce/admin/orders/{$order.idorder}">Pedido N°{$order.idorder}</a></li>
     </ol>
     </section>
 
@@ -35,7 +35,7 @@
             </div>
             {/if}
             <!-- form start -->
-            <form role="form" action="/admin/orders/{$order.idorder}/status" method="post">
+            <form role="form" action="/ecommerce/admin/orders/{$order.idorder}/status" method="post">
                 <div class="box-body">
                     <div class="form-group">
                         <label for="desproduct">Status do Pedido</label>
